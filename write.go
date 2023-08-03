@@ -14,8 +14,6 @@ import (
 	"time"
 
 	"github.com/klauspost/compress/flate"
-
-	"github.com/ZackaryWelch/websocket/internal/errd"
 )
 
 // Writer returns a writer bounded by the context that will write
@@ -200,7 +198,7 @@ func (mw *msgWriterState) write(p []byte) (int, error) {
 
 // Close flushes the frame to the connection.
 func (mw *msgWriterState) Close() (err error) {
-	defer errd.Wrap(&err, "failed to close writer")
+	defer Wrap(&err, "failed to close writer")
 
 	err = mw.writeMu.lock(mw.ctx)
 	if err != nil {
@@ -330,7 +328,7 @@ func (c *Conn) writeFrame(ctx context.Context, fin bool, flate bool, opcode opco
 }
 
 func (c *Conn) writeFramePayload(p []byte) (n int, err error) {
-	defer errd.Wrap(&err, "failed to write frame payload")
+	defer Wrap(&err, "failed to write frame payload")
 
 	if !c.writeHeader.masked {
 		return c.bw.Write(p)

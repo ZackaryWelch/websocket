@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ZackaryWelch/websocket/internal/errd"
 	"github.com/ZackaryWelch/websocket/internal/xsync"
 )
 
@@ -298,7 +297,7 @@ func (c *Conn) handleControl(ctx context.Context, h header) (err error) {
 }
 
 func (c *Conn) reader(ctx context.Context) (_ MessageType, _ io.Reader, err error) {
-	defer errd.Wrap(&err, "failed to get reader")
+	defer Wrap(&err, "failed to get reader")
 
 	err = c.readMu.lock(ctx)
 	if err != nil {

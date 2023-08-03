@@ -10,7 +10,6 @@ import (
 
 	"github.com/ZackaryWelch/websocket"
 	"github.com/ZackaryWelch/websocket/internal/bpool"
-	"github.com/ZackaryWelch/websocket/internal/errd"
 )
 
 // Read reads a protobuf message from c into v.
@@ -20,7 +19,7 @@ func Read(ctx context.Context, c *websocket.Conn, v proto.Message) error {
 }
 
 func read(ctx context.Context, c *websocket.Conn, v proto.Message) (err error) {
-	defer errd.Wrap(&err, "failed to read protobuf message")
+	defer websocket.Wrap(&err, "failed to read protobuf message")
 
 	typ, r, err := c.Reader(ctx)
 	if err != nil {
@@ -56,7 +55,7 @@ func Write(ctx context.Context, c *websocket.Conn, v proto.Message) error {
 }
 
 func write(ctx context.Context, c *websocket.Conn, v proto.Message) (err error) {
-	defer errd.Wrap(&err, "failed to write protobuf message")
+	defer websocket.Wrap(&err, "failed to write protobuf message")
 
 	b := bpool.Get()
 	pb := proto.NewBuffer(b.Bytes())

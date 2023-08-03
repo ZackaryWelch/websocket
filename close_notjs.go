@@ -10,8 +10,6 @@ import (
 	"fmt"
 	"log"
 	"time"
-
-	"github.com/ZackaryWelch/websocket/internal/errd"
 )
 
 // Close performs the WebSocket close handshake with the given status code and reason.
@@ -33,7 +31,7 @@ func (c *Conn) Close(code StatusCode, reason string) error {
 }
 
 func (c *Conn) closeHandshake(code StatusCode, reason string) (err error) {
-	defer errd.Wrap(&err, "failed to close WebSocket")
+	defer Wrap(&err, "failed to close WebSocket")
 
 	writeErr := c.writeClose(code, reason)
 	closeHandshakeErr := c.waitCloseHandshake()

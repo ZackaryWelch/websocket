@@ -16,8 +16,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-
-	"github.com/ZackaryWelch/websocket/internal/errd"
 )
 
 // DialOptions represents Dial's options.
@@ -64,7 +62,7 @@ func Dial(ctx context.Context, u string, opts *DialOptions) (*Conn, *http.Respon
 }
 
 func dial(ctx context.Context, urls string, opts *DialOptions, rand io.Reader) (_ *Conn, _ *http.Response, err error) {
-	defer errd.Wrap(&err, "failed to WebSocket dial")
+	defer Wrap(&err, "failed to WebSocket dial")
 
 	if opts == nil {
 		opts = &DialOptions{}

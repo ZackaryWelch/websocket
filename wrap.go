@@ -1,4 +1,4 @@
-package errd
+package websocket
 
 import (
 	"fmt"

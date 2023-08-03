@@ -16,8 +16,6 @@ import (
 	"net/url"
 	"path/filepath"
 	"strings"
-
-	"github.com/ZackaryWelch/websocket/internal/errd"
 )
 
 // AcceptOptions represents Accept's options.
@@ -76,7 +74,7 @@ func Accept(w http.ResponseWriter, r *http.Request, opts *AcceptOptions) (*Conn,
 }
 
 func accept(w http.ResponseWriter, r *http.Request, opts *AcceptOptions) (_ *Conn, err error) {
-	defer errd.Wrap(&err, "failed to accept WebSocket connection")
+	defer Wrap(&err, "failed to accept WebSocket connection")
 
 	if opts == nil {
 		opts = &AcceptOptions{}

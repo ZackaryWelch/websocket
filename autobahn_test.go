@@ -17,7 +17,6 @@ import (
 	"time"
 
 	"github.com/ZackaryWelch/websocket"
-	"github.com/ZackaryWelch/websocket/internal/errd"
 	"github.com/ZackaryWelch/websocket/internal/test/assert"
 	"github.com/ZackaryWelch/websocket/internal/test/wstest"
 )
@@ -135,7 +134,7 @@ func wstestClientServer(ctx context.Context) (url string, closeFn func(), err er
 }
 
 func wstestCaseCount(ctx context.Context, url string) (cases int, err error) {
-	defer errd.Wrap(&err, "failed to get case count")
+	defer websocket.Wrap(&err, "failed to get case count")
 
 	c, _, err := websocket.Dial(ctx, url+"/getCaseCount", nil)
 	if err != nil {
@@ -197,7 +196,7 @@ func checkWSTestIndex(t *testing.T, path string) {
 }
 
 func unusedListenAddr() (_ string, err error) {
-	defer errd.Wrap(&err, "failed to get unused listen address")
+	defer websocket.Wrap(&err, "failed to get unused listen address")
 	l, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
 		return "", err

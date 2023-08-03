@@ -7,8 +7,6 @@ import (
 	"io"
 	"math"
 	"math/bits"
-
-	"github.com/ZackaryWelch/websocket/internal/errd"
 )
 
 // opcode represents a WebSocket opcode.
@@ -49,7 +47,7 @@ type header struct {
 // readFrameHeader reads a header from the reader.
 // See https://tools.ietf.org/html/rfc6455#section-5.2.
 func readFrameHeader(r *bufio.Reader, readBuf []byte) (h header, err error) {
-	defer errd.Wrap(&err, "failed to read frame header")
+	defer Wrap(&err, "failed to read frame header")
 
 	b, err := r.ReadByte()
 	if err != nil {
@@ -107,7 +105,7 @@ const maxControlPayload = 125
 // writeFrameHeader writes the bytes of the header to w.
 // See https://tools.ietf.org/html/rfc6455#section-5.2
 func writeFrameHeader(h header, w *bufio.Writer, buf []byte) (err error) {
-	defer errd.Wrap(&err, "failed to write frame header")
+	defer Wrap(&err, "failed to write frame header")
 
 	var b byte
 	if h.fin {

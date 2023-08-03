@@ -8,7 +8,6 @@ import (
 
 	"github.com/ZackaryWelch/websocket"
 	"github.com/ZackaryWelch/websocket/internal/bpool"
-	"github.com/ZackaryWelch/websocket/internal/errd"
 )
 
 // Read reads a JSON message from c into v.
@@ -18,7 +17,7 @@ func Read(ctx context.Context, c *websocket.Conn, v interface{}) error {
 }
 
 func read(ctx context.Context, c *websocket.Conn, v interface{}) (err error) {
-	defer errd.Wrap(&err, "failed to read JSON message")
+	defer websocket.Wrap(&err, "failed to read JSON message")
 
 	_, r, err := c.Reader(ctx)
 	if err != nil {
@@ -49,7 +48,7 @@ func Write(ctx context.Context, c *websocket.Conn, v interface{}) error {
 }
 
 func write(ctx context.Context, c *websocket.Conn, v interface{}) (err error) {
-	defer errd.Wrap(&err, "failed to write JSON message")
+	defer websocket.Wrap(&err, "failed to write JSON message")
 
 	w, err := c.Writer(ctx, websocket.MessageText)
 	if err != nil {

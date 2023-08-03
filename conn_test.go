@@ -21,7 +21,6 @@ import (
 	"github.com/golang/protobuf/ptypes/duration"
 
 	"github.com/ZackaryWelch/websocket"
-	"github.com/ZackaryWelch/websocket/internal/errd"
 	"github.com/ZackaryWelch/websocket/internal/test/assert"
 	"github.com/ZackaryWelch/websocket/internal/test/wstest"
 	"github.com/ZackaryWelch/websocket/internal/test/xrand"
@@ -482,7 +481,7 @@ func BenchmarkConn(b *testing.B) {
 }
 
 func echoServer(w http.ResponseWriter, r *http.Request, opts *websocket.AcceptOptions) (err error) {
-	defer errd.Wrap(&err, "echo server failed")
+	defer websocket.Wrap(&err, "echo server failed")
 
 	c, err := websocket.Accept(w, r, opts)
 	if err != nil {
