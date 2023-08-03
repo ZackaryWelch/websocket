@@ -1,3 +1,4 @@
+//go:build !js
 // +build !js
 
 package websocket
@@ -6,14 +7,13 @@ import (
 	"context"
 	"crypto/rand"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 
-	"nhooyr.io/websocket/internal/test/assert"
+	"github.com/ZackaryWelch/websocket/internal/test/assert"
 )
 
 func TestBadDials(t *testing.T) {
@@ -34,11 +34,11 @@ func TestBadDials(t *testing.T) {
 			},
 			{
 				name: "badURLScheme",
-				url:  "ftp://nhooyr.io",
+				url:  "ftp://github.com/ZackaryWelch",
 			},
 			{
 				name: "badTLS",
-				url:  "wss://totallyfake.nhooyr.io",
+				url:  "wss://totallyfake.github.com/ZackaryWelch",
 			},
 			{
 				name: "badReader",
@@ -75,7 +75,7 @@ func TestBadDials(t *testing.T) {
 		_, _, err := Dial(ctx, "ws://example.com", &DialOptions{
 			HTTPClient: mockHTTPClient(func(*http.Request) (*http.Response, error) {
 				return &http.Response{
-					Body: ioutil.NopCloser(strings.NewReader("hi")),
+					Body: io.NopCloser(strings.NewReader("hi")),
 				}, nil
 			}),
 		})
@@ -97,7 +97,7 @@ func TestBadDials(t *testing.T) {
 			return &http.Response{
 				StatusCode: http.StatusSwitchingProtocols,
 				Header:     h,
-				Body:       ioutil.NopCloser(strings.NewReader("hi")),
+				Body:       io.NopCloser(strings.NewReader("hi")),
 			}, nil
 		}
 

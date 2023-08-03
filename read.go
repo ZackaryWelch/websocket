@@ -1,3 +1,4 @@
+//go:build !js
 // +build !js
 
 package websocket
@@ -8,12 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"strings"
 	"time"
 
-	"nhooyr.io/websocket/internal/errd"
-	"nhooyr.io/websocket/internal/xsync"
+	"github.com/ZackaryWelch/websocket/internal/errd"
+	"github.com/ZackaryWelch/websocket/internal/xsync"
 )
 
 // Reader reads from the connection until there is a WebSocket
@@ -38,7 +38,7 @@ func (c *Conn) Read(ctx context.Context) (MessageType, []byte, error) {
 		return 0, nil, err
 	}
 
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	return typ, b, err
 }
 

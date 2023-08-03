@@ -1,3 +1,4 @@
+//go:build !js
 // +build !js
 
 package websocket_test
@@ -7,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -20,14 +20,14 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
 
-	"nhooyr.io/websocket"
-	"nhooyr.io/websocket/internal/errd"
-	"nhooyr.io/websocket/internal/test/assert"
-	"nhooyr.io/websocket/internal/test/wstest"
-	"nhooyr.io/websocket/internal/test/xrand"
-	"nhooyr.io/websocket/internal/xsync"
-	"nhooyr.io/websocket/wsjson"
-	"nhooyr.io/websocket/wspb"
+	"github.com/ZackaryWelch/websocket"
+	"github.com/ZackaryWelch/websocket/internal/errd"
+	"github.com/ZackaryWelch/websocket/internal/test/assert"
+	"github.com/ZackaryWelch/websocket/internal/test/wstest"
+	"github.com/ZackaryWelch/websocket/internal/test/xrand"
+	"github.com/ZackaryWelch/websocket/internal/xsync"
+	"github.com/ZackaryWelch/websocket/wsjson"
+	"github.com/ZackaryWelch/websocket/wspb"
 )
 
 func TestConn(t *testing.T) {
@@ -174,7 +174,7 @@ func TestConn(t *testing.T) {
 			return n2.Close()
 		})
 
-		b, err := ioutil.ReadAll(n1)
+		b, err := io.ReadAll(n1)
 		assert.Success(t, err)
 
 		_, err = n1.Read(nil)
@@ -205,7 +205,7 @@ func TestConn(t *testing.T) {
 			return nil
 		})
 
-		_, err := ioutil.ReadAll(n1)
+		_, err := io.ReadAll(n1)
 		assert.Contains(t, err, `unexpected frame type read (expected MessageBinary): MessageText`)
 
 		select {

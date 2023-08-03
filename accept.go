@@ -1,3 +1,4 @@
+//go:build !js
 // +build !js
 
 package websocket
@@ -16,7 +17,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"nhooyr.io/websocket/internal/errd"
+	"github.com/ZackaryWelch/websocket/internal/errd"
 )
 
 // AcceptOptions represents Accept's options.
@@ -80,7 +81,7 @@ func accept(w http.ResponseWriter, r *http.Request, opts *AcceptOptions) (_ *Con
 	if opts == nil {
 		opts = &AcceptOptions{}
 	}
-	opts = &*opts
+	opts = &(*opts)
 
 	errCode, err := verifyClientRequest(w, r)
 	if err != nil {

@@ -1,3 +1,4 @@
+//go:build !js
 // +build !js
 
 package websocket_test
@@ -6,7 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -15,10 +16,10 @@ import (
 	"testing"
 	"time"
 
-	"nhooyr.io/websocket"
-	"nhooyr.io/websocket/internal/errd"
-	"nhooyr.io/websocket/internal/test/assert"
-	"nhooyr.io/websocket/internal/test/wstest"
+	"github.com/ZackaryWelch/websocket"
+	"github.com/ZackaryWelch/websocket/internal/errd"
+	"github.com/ZackaryWelch/websocket/internal/test/assert"
+	"github.com/ZackaryWelch/websocket/internal/test/wstest"
 )
 
 var excludedAutobahnCases = []string{
@@ -110,7 +111,7 @@ func wstestClientServer(ctx context.Context) (url string, closeFn func(), err er
 		return "", nil, fmt.Errorf("failed to write spec: %w", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*15)
+	ctx2, cancel := context.WithTimeout(context.Background(), time.Minute*15)
 	defer func() {
 		if err != nil {
 			cancel()
@@ -122,7 +123,7 @@ func wstestClientServer(ctx context.Context) (url string, closeFn func(), err er
 		// See https://github.com/crossbario/autobahn-testsuite/blob/058db3a36b7c3a1edf68c282307c6b899ca4857f/autobahntestsuite/autobahntestsuite/wstest.py#L124
 		"--webport=0",
 	}
-	wstest := exec.CommandContext(ctx, "wstest", args...)
+	wstest := exec.CommandContext(ctx2, "wstest", args...)
 	err = wstest.Start()
 	if err != nil {
 		return "", nil, fmt.Errorf("failed to start wstest: %w", err)
@@ -146,7 +147,7 @@ func wstestCaseCount(ctx context.Context, url string) (cases int, err error) {
 	if err != nil {
 		return 0, err
 	}
-	b, err := ioutil.ReadAll(r)
+	b, err := io.ReadAll(r)
 	if err != nil {
 		return 0, err
 	}
@@ -161,7 +162,7 @@ func wstestCaseCount(ctx context.Context, url string) (cases int, err error) {
 }
 
 func checkWSTestIndex(t *testing.T, path string) {
-	wstestOut, err := ioutil.ReadFile(path)
+	wstestOut, err := os.ReadFile(path)
 	assert.Success(t, err)
 
 	var indexJSON map[string]map[string]struct {
@@ -206,7 +207,7 @@ func unusedListenAddr() (_ string, err error) {
 }
 
 func tempJSONFile(v interface{}) (string, error) {
-	f, err := ioutil.TempFile("", "temp.json")
+	f, err := os.CreateTemp("", "temp.json")
 	if err != nil {
 		return "", fmt.Errorf("temp file: %w", err)
 	}
