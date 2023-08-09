@@ -170,7 +170,7 @@ func verifyClientRequest(w http.ResponseWriter, r *http.Request) (errCode int, _
 		return http.StatusUpgradeRequired, fmt.Errorf("WebSocket protocol violation: Upgrade header %q does not contain websocket", r.Header.Get("Upgrade"))
 	}
 
-	if r.Method != "GET" {
+	if r.Method != http.MethodGET {
 		return http.StatusMethodNotAllowed, fmt.Errorf("WebSocket protocol violation: handshake request method is not GET but %q", r.Method)
 	}
 

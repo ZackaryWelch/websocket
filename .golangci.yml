@@ -1,0 +1,164 @@
+# See https://golangci-lint.run/usage/integrations/ for editor integrations
+# Supports VSCode and vim-go
+run:
+  concurrency: 8
+  tests: true
+  go: '1.21'
+
+issues:
+  new-from-branch: master
+  max-same-issues: 0
+  max-issues-per-linter: 0
+  exclude:
+    - var-naming
+    - SA9004 # Assuming types is fine
+    - receiver-naming # Covered with another linter
+    - emptyFallthrough
+
+    # stylecheck
+    - ST1001 # . imports are okay for errors
+    - ST1003 # Checking for capitalization. Very messy
+    - ST1016  # Receiver consistency. A few packages break this too much
+
+linters-settings:
+  cyclop:
+    max-complexity: 15
+
+  errcheck:
+    check-type-assertions: true
+    check-blank: false
+
+  errchkjson:
+    report-no-exported: true
+  
+  gocritic:
+    disabled-checks:
+      - captLocal
+      - commentFormatting
+      - ifElseChain
+      - sloppyReassign
+      - singleCaseSwitch
+      - commentedOutCode # Useful to disable
+    enabled-tags:
+      - experimental
+      - opinionated
+    rules:
+      tooManyResultsChecker:
+        maxResults: 3
+      nestingReduce:
+        bodyWidth: 4
+      hugeParam:
+        sizeThreshold: 64
+
+  gocyclo:
+    min-complexity: 20
+
+  goconst:
+    min-occurrences: 2
+    numbers: false # Using gomnd
+    ignore-calls : true # Too picky with structured logging
+    ignore-tests: true # Don't be so picky with specific test constants
+
+  gomnd:
+    ignored-numbers:
+        - '100.0'
+        - '128'
+        - '10'
+        - '2'
+        - '3'
+        - '4'
+        - '6'
+        - '8'
+        - '36'
+        - '64'
+
+    ignored-files:
+      - 'nas/util.go'
+
+  godot:
+    period: false
+    capital: false
+
+  misspell:
+    ignore-words:
+      - dynamicdns
+
+  revive:
+    rules:
+      - name: context-as-argument
+        arguments:
+          - allowTypesBefore: "*testing.T"
+
+  gomoddirectives:
+      replace-allow-list:
+        - github.com/russellhaering/goxmldsig # Dependency for SAML which breaks on latest release. Still WIP as of 9-22
+        - github.com/crewjam/saml # Hacky workaround for an ongoing issue with saml/samlidp as of 11-22
+
+  govet:
+    check-shadowing: true # Can be good to check, but pretty obnoxious
+
+  testpackage:
+    allow-packages:
+      - v1 # API service tests rely on a lot of unexported structure parameters
+
+  unparam:
+    check-exported: true # Very loud, but sort of necessary to function
+
+  lll:
+    line-length: 180
+    tab-width: 2
+
+linters:
+  enable-all: true
+  disable:
+    # Whitespace related
+    - wsl
+    - whitespace
+    - nlreturn
+
+    # These are wholely unnecessary
+    - wrapcheck # Functions matching error return to be replaced with custom err variable
+    - varnamelen 
+    - exhaustivestruct # Using every struct method when initializing
+    - exhaustive # Using every enum constant in switch
+    - exhaustruct
+    - funlen # Restrict funtions to variable lines
+    - nonamedreturns # Naming returns for 2+ returns of the same type is good, but not required
+    - errchkjson
+    # We don't need these at all
+    - gofumpt 
+    - gci
+    - interfacebloat
+    - ireturn
+    - depguard
+    - tagalign
+    # Could be nice, but not fully compatible
+    - forbidigo # Fmt is useful and accessible in a few instances
+    - tagliatelle # Will need to make sure UI doesn't break, but consistency is good
+    - gochecknoglobals # Too picky
+    - errcheck # Weird with go routines that can return errors
+    - nakedret # Doesn't work with named types
+    - paralleltest
+    - tparallel
+
+    # Complexity linters
+    - nestif
+    - gocognit
+    - gocyclo
+    - cyclop
+    - maintidx
+
+    # Deprecated
+    - scopelint 
+    - interfacer
+    - golint
+    - ifshort
+    - varcheck
+    - structcheck
+    - nosnakecase
+    - deadcode
+    - maligned
+    - rowserrcheck
+    - sqlclosecheck
+    - wastedassign
+    - exhaustivestruct
