@@ -200,7 +200,7 @@ func Test_verifyServerHandshake(t *testing.T) {
 			tc.response(w)
 			resp := w.Result()
 
-			r := httptest.NewRequest("GET", "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 			key, err := secWebSocketKey(rand.Reader)
 			assert.Success(t, err)
 			r.Header.Set("Sec-WebSocket-Key", key)

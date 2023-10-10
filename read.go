@@ -148,7 +148,7 @@ func (c *Conn) readLoop(ctx context.Context) (header, error) {
 		}
 
 		if h.rsv1 && c.readRSV1Illegal(h) || h.rsv2 || h.rsv3 {
-			err := fmt.Errorf("received header with unexpected rsv bits set: %v:%v:%v", h.rsv1, h.rsv2, h.rsv3)
+			err = fmt.Errorf("received header with unexpected rsv bits set: %v:%v:%v", h.rsv1, h.rsv2, h.rsv3)
 			c.writeError(StatusProtocolError, err)
 			return header{}, err
 		}
@@ -159,8 +159,7 @@ func (c *Conn) readLoop(ctx context.Context) (header, error) {
 
 		switch h.opcode {
 		case opClose, opPing, opPong:
-			err = c.handleControl(ctx, h)
-			if err != nil {
+			if err = c.handleControl(ctx, h); err != nil {
 				// Pass through CloseErrors when receiving a close frame.
 				if h.opcode == opClose && CloseStatus(err) != -1 {
 					return header{}, err
@@ -170,7 +169,7 @@ func (c *Conn) readLoop(ctx context.Context) (header, error) {
 		case opContinuation, opText, opBinary:
 			return h, nil
 		default:
-			err := fmt.Errorf("received unknown opcode %v", h.opcode)
+			err = fmt.Errorf("received unknown opcode %v", h.opcode)
 			c.writeError(StatusProtocolError, err)
 			return header{}, err
 		}
@@ -238,24 +237,23 @@ func (c *Conn) readFramePayload(ctx context.Context, p []byte) (int, error) {
 
 func (c *Conn) handleControl(ctx context.Context, h header) (err error) {
 	if h.payloadLength < 0 || h.payloadLength > maxControlPayload {
-		err := fmt.Errorf("received control frame payload with invalid length: %d", h.payloadLength)
+		err = fmt.Errorf("received control frame payload with invalid length: %d", h.payloadLength)
 		c.writeError(StatusProtocolError, err)
-		return err
+		return
 	}
 
 	if !h.fin {
-		err := errors.New("received fragmented control frame")
+		err = errors.New("received fragmented control frame")
 		c.writeError(StatusProtocolError, err)
-		return err
+		return
 	}
 
 	ctx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
 	b := c.readControlBuf[:h.payloadLength]
-	_, err = c.readFramePayload(ctx, b)
-	if err != nil {
-		return err
+	if _, err = c.readFramePayload(ctx, b); err != nil {
+		return
 	}
 
 	if h.masked {
@@ -275,25 +273,25 @@ func (c *Conn) handleControl(ctx context.Context, h header) (err error) {
 			default:
 			}
 		}
-		return nil
+		return
 	}
 
 	defer func() {
 		c.readCloseFrameErr = err
 	}()
 
-	ce, err := parseClosePayload(b)
-	if err != nil {
-		err = fmt.Errorf("received invalid close payload: %w", err)
+	ce, err2 := parseClosePayload(b)
+	if err2 != nil {
+		err = fmt.Errorf("received invalid close payload: %w", err2)
 		c.writeError(StatusProtocolError, err)
-		return err
+		return
 	}
 
 	err = fmt.Errorf("received close frame: %w", ce)
 	c.setCloseErr(err)
 	c.writeClose(ce.Code, ce.Reason)
 	c.close(err)
-	return err
+	return
 }
 
 func (c *Conn) reader(ctx context.Context) (_ MessageType, _ io.Reader, err error) {

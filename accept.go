@@ -62,8 +62,7 @@ type AcceptOptions struct {
 	CompressionThreshold int
 }
 
-// Accept accepts a WebSocket handshake from a client and upgrades the
-// the connection to a WebSocket.
+// Accept accepts a WebSocket handshake from a client and upgrades the connection to a WebSocket.
 //
 // Accept will not allow cross origin requests by default.
 // See the InsecureSkipVerify and OriginPatterns options to allow cross origin requests.
@@ -170,7 +169,7 @@ func verifyClientRequest(w http.ResponseWriter, r *http.Request) (errCode int, _
 		return http.StatusUpgradeRequired, fmt.Errorf("WebSocket protocol violation: Upgrade header %q does not contain websocket", r.Header.Get("Upgrade"))
 	}
 
-	if r.Method != http.MethodGET {
+	if r.Method != http.MethodGet {
 		return http.StatusMethodNotAllowed, fmt.Errorf("WebSocket protocol violation: handshake request method is not GET but %q", r.Method)
 	}
 
@@ -229,9 +228,9 @@ func selectSubprotocol(r *http.Request, subprotocols []string) string {
 	return ""
 }
 
-func acceptCompression(r *http.Request, w http.ResponseWriter, mode CompressionMode) (*compressionOptions, error) {
+func acceptCompression(r *http.Request, w http.ResponseWriter, mode CompressionMode) (opts *compressionOptions, err error) {
 	if mode == CompressionDisabled {
-		return nil, nil
+		return
 	}
 
 	for _, ext := range websocketExtensions(r.Header) {
@@ -243,7 +242,7 @@ func acceptCompression(r *http.Request, w http.ResponseWriter, mode CompressionM
 			// 	return acceptWebkitDeflate(w, ext, mode)
 		}
 	}
-	return nil, nil
+	return
 }
 
 func acceptDeflate(w http.ResponseWriter, ext websocketExtension, mode CompressionMode) (*compressionOptions, error) {

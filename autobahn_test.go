@@ -58,12 +58,12 @@ func TestAutobahn(t *testing.T) {
 		for i := 1; i <= cases; i++ {
 			i := i
 			t.Run("", func(t *testing.T) {
-				ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+				ctx2, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 				defer cancel()
 
-				c, _, err := websocket.Dial(ctx, fmt.Sprintf(wstestURL+"/runCase?case=%v&agent=main", i), nil)
+				c, _, err := websocket.Dial(ctx2, fmt.Sprintf(wstestURL+"/runCase?case=%v&agent=main", i), nil)
 				assert.Success(t, err)
-				err = wstest.EchoLoop(ctx, c)
+				err = wstest.EchoLoop(ctx2, c)
 				t.Logf("echoLoop: %v", err)
 			})
 		}

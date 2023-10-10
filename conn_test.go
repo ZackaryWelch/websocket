@@ -16,9 +16,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/duration"
-
 	"github.com/ZackaryWelch/websocket"
 	"github.com/ZackaryWelch/websocket/internal/test/assert"
 	"github.com/ZackaryWelch/websocket/internal/test/wstest"
@@ -26,6 +23,8 @@ import (
 	"github.com/ZackaryWelch/websocket/internal/xsync"
 	"github.com/ZackaryWelch/websocket/wsjson"
 	"github.com/ZackaryWelch/websocket/wspb"
+	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/duration"
 )
 
 func TestConn(t *testing.T) {
@@ -234,7 +233,7 @@ func TestConn(t *testing.T) {
 		assert.Equal(t, "read msg", exp, act)
 
 		select {
-		case err := <-werr:
+		case err = <-werr:
 			assert.Success(t, err)
 		case <-tt.ctx.Done():
 			t.Fatal(tt.ctx.Err())

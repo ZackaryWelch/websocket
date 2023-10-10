@@ -155,7 +155,7 @@ func handshakeRequest(ctx context.Context, urls string, opts *DialOptions, copts
 		return nil, fmt.Errorf("unexpected url scheme: %q", u.Scheme)
 	}
 
-	req, _ := http.NewRequestWithContext(ctx, "GET", u.String(), nil)
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), http.NoBody)
 	req.Header = opts.HTTPHeader.Clone()
 	req.Header.Set("Connection", "Upgrade")
 	req.Header.Set("Upgrade", "websocket")
@@ -230,33 +230,34 @@ func verifySubprotocol(subprotos []string, resp *http.Response) error {
 	return fmt.Errorf("WebSocket protocol violation: unexpected Sec-WebSocket-Protocol from server: %q", proto)
 }
 
-func verifyServerExtensions(copts *compressionOptions, h http.Header) (*compressionOptions, error) {
+func verifyServerExtensions(copts *compressionOptions, h http.Header) (opts *compressionOptions, err error) {
 	exts := websocketExtensions(h)
 	if len(exts) == 0 {
-		return nil, nil
+		return
 	}
 
 	ext := exts[0]
 	if ext.name != "permessage-deflate" || len(exts) > 1 || copts == nil {
-		return nil, fmt.Errorf("WebSocket protcol violation: unsupported extensions from server: %+v", exts[1:])
+		err = fmt.Errorf("WebSocket protcol violation: unsupported extensions from server: %+v", exts[1:])
+		return
 	}
 
-	copts = &*copts
+	opts = &*copts
 
 	for _, p := range ext.params {
 		switch p {
 		case "client_no_context_takeover":
-			copts.clientNoContextTakeover = true
+			opts.clientNoContextTakeover = true
 			continue
 		case "server_no_context_takeover":
-			copts.serverNoContextTakeover = true
+			opts.serverNoContextTakeover = true
 			continue
 		}
 
-		return nil, fmt.Errorf("unsupported permessage-deflate parameter: %q", p)
+		err = fmt.Errorf("unsupported permessage-deflate parameter: %q", p)
 	}
 
-	return copts, nil
+	return
 }
 
 var bufioReaderPool sync.Pool

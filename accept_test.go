@@ -22,7 +22,7 @@ func TestAccept(t *testing.T) {
 		t.Parallel()
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("GET", "/", nil)
+		r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 
 		_, err := Accept(w, r, nil)
 		assert.Contains(t, err, "protocol violation")
@@ -32,7 +32,7 @@ func TestAccept(t *testing.T) {
 		t.Parallel()
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("GET", "/", nil)
+		r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		r.Header.Set("Connection", "Upgrade")
 		r.Header.Set("Upgrade", "websocket")
 		r.Header.Set("Sec-WebSocket-Version", "13")
@@ -49,7 +49,7 @@ func TestAccept(t *testing.T) {
 		w := mockHijacker{
 			ResponseWriter: httptest.NewRecorder(),
 		}
-		r := httptest.NewRequest("GET", "/", nil)
+		r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		r.Header.Set("Connection", "Upgrade")
 		r.Header.Set("Upgrade", "websocket")
 		r.Header.Set("Sec-WebSocket-Version", "13")
@@ -64,7 +64,7 @@ func TestAccept(t *testing.T) {
 		t.Parallel()
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("GET", "/", nil)
+		r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		r.Header.Set("Connection", "Upgrade")
 		r.Header.Set("Upgrade", "websocket")
 		r.Header.Set("Sec-WebSocket-Version", "13")
@@ -84,7 +84,7 @@ func TestAccept(t *testing.T) {
 			},
 		}
 
-		r := httptest.NewRequest("GET", "/", nil)
+		r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 		r.Header.Set("Connection", "Upgrade")
 		r.Header.Set("Upgrade", "websocket")
 		r.Header.Set("Sec-WebSocket-Version", "13")
@@ -170,7 +170,7 @@ func Test_verifyClientHandshake(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			r := httptest.NewRequest(tc.method, "/", nil)
+			r := httptest.NewRequest(tc.method, "/", http.NoBody)
 
 			r.ProtoMajor = 1
 			r.ProtoMinor = 1
@@ -238,7 +238,7 @@ func Test_selectSubprotocol(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			r := httptest.NewRequest("GET", "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 			r.Header.Set("Sec-WebSocket-Protocol", strings.Join(tc.clientProtocols, ","))
 
 			negotiated := selectSubprotocol(r, tc.serverProtocols)
@@ -313,7 +313,7 @@ func Test_authenticateOrigin(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			r := httptest.NewRequest("GET", "http://"+tc.host+"/", nil)
+			r := httptest.NewRequest(http.MethodGet, "http://"+tc.host+"/", http.NoBody)
 			r.Header.Set("Origin", tc.origin)
 
 			err := authenticateOrigin(r, tc.originPatterns)
@@ -386,7 +386,7 @@ func Test_acceptCompression(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			r := httptest.NewRequest(http.MethodGet, "/", nil)
+			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 			r.Header.Set("Sec-WebSocket-Extensions", tc.reqSecWebSocketExtensions)
 
 			w := httptest.NewRecorder()

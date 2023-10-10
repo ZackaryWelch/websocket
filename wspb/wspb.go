@@ -6,10 +6,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/golang/protobuf/proto"
-
 	"github.com/ZackaryWelch/websocket"
 	"github.com/ZackaryWelch/websocket/internal/bpool"
+	"github.com/golang/protobuf/proto"
 )
 
 // Read reads a protobuf message from c into v.

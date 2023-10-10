@@ -9,16 +9,50 @@ issues:
   new-from-branch: master
   max-same-issues: 0
   max-issues-per-linter: 0
+  fix: true
   exclude:
+    - dot-imports # Log package imports
     - var-naming
+    - blank-imports
     - SA9004 # Assuming types is fine
     - receiver-naming # Covered with another linter
-    - emptyFallthrough
+    - exported # Some names need matching with package prefix
 
     # stylecheck
     - ST1001 # . imports are okay for errors
     - ST1003 # Checking for capitalization. Very messy
-    - ST1016  # Receiver consistency. A few packages break this too much
+    - ST1016 # Receiver consistency. A few packages break this too much
+
+    # gosec
+    - G402 # We enable InsecureSkipVerify on purpose sometimes
+    - G101 # Checks hardcoded credentials, but fails on API path names
+    - G204 # Complains about passing variable arguments to exec commands
+    - G602 # Potential slice out of bound, sometimes erroneous
+
+  exclude-rules:
+    # Ignore erroneous unused test functions
+    # Ignore unused context and unset responses from API interfaces
+    # Ignore hardcoded JSON objects
+    # Ignore long base64 encoded strings in tests
+    - path: nas/api/cluster_test.go
+      linters:
+        - unused
+    - path: pkg/api/service/v1
+      linters:
+        - unparam
+        - lll
+    - path: internal/dao/profile.go
+      linters:
+        - lll
+    - path: sys/notify.go
+      linters:
+        - lll
+    - path: sqldb/internal_alerts.go
+      linters:
+        - lll
+    - path: sys/license
+      linters:
+        - lll
 
 linters-settings:
   cyclop:
@@ -30,7 +64,14 @@ linters-settings:
 
   errchkjson:
     report-no-exported: true
-  
+
+  tagliatelle:
+    case:
+      use-field-name: true
+      rules:
+        json: snake
+        mapstructure: snake
+
   gocritic:
     disabled-checks:
       - captLocal
@@ -53,27 +94,30 @@ linters-settings:
   gocyclo:
     min-complexity: 20
 
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/iXsystems/TrueCommand/middleware)
+
+    custom-order: true
+
   goconst:
     min-occurrences: 2
     numbers: false # Using gomnd
-    ignore-calls : true # Too picky with structured logging
+    ignore-calls: true # Too picky with structured logging
     ignore-tests: true # Don't be so picky with specific test constants
+    match-constant: false
 
   gomnd:
     ignored-numbers:
-        - '100.0'
-        - '128'
-        - '10'
-        - '2'
-        - '3'
-        - '4'
-        - '6'
-        - '8'
-        - '36'
-        - '64'
+      - '100.0'
+      - '10'
+      - '2'
+      - '3'
 
     ignored-files:
-      - 'nas/util.go'
+      - 'nas/obj/util.go'
 
   godot:
     period: false
@@ -89,24 +133,20 @@ linters-settings:
         arguments:
           - allowTypesBefore: "*testing.T"
 
-  gomoddirectives:
-      replace-allow-list:
-        - github.com/russellhaering/goxmldsig # Dependency for SAML which breaks on latest release. Still WIP as of 9-22
-        - github.com/crewjam/saml # Hacky workaround for an ongoing issue with saml/samlidp as of 11-22
-
   govet:
-    check-shadowing: true # Can be good to check, but pretty obnoxious
+    check-shadowing: true
 
   testpackage:
     allow-packages:
       - v1 # API service tests rely on a lot of unexported structure parameters
 
   unparam:
-    check-exported: true # Very loud, but sort of necessary to function
+    check-exported: true
 
   lll:
     line-length: 180
     tab-width: 2
+
 
 linters:
   enable-all: true
@@ -118,7 +158,7 @@ linters:
 
     # These are wholely unnecessary
     - wrapcheck # Functions matching error return to be replaced with custom err variable
-    - varnamelen 
+    - varnamelen
     - exhaustivestruct # Using every struct method when initializing
     - exhaustive # Using every enum constant in switch
     - exhaustruct
@@ -126,20 +166,30 @@ linters:
     - nonamedreturns # Naming returns for 2+ returns of the same type is good, but not required
     - errchkjson
     # We don't need these at all
-    - gofumpt 
-    - gci
+    - gofumpt
     - interfacebloat
     - ireturn
     - depguard
     - tagalign
     # Could be nice, but not fully compatible
+    - contextcheck # Doesn't like global contexts or gin interface checks
     - forbidigo # Fmt is useful and accessible in a few instances
+    - dupl # Doesn't like boilerplate interfaces
     - tagliatelle # Will need to make sure UI doesn't break, but consistency is good
     - gochecknoglobals # Too picky
     - errcheck # Weird with go routines that can return errors
     - nakedret # Doesn't work with named types
+    - forcetypeassert # I'd personally rather force a panic in rare cases like this
+    # Parallel tests are too finicky
+    - tparallel 
     - paralleltest
-    - tparallel
+    - thelper # Unhelpful about use of testing.TB
+    - testpackage
+    - testableexamples
+
+    # Priority to fix
+    - goerr113 # Ensure all errors are typed
+    - godox # Shows TODO comments
 
     # Complexity linters
     - nestif
@@ -149,7 +199,7 @@ linters:
     - maintidx
 
     # Deprecated
-    - scopelint 
+    - scopelint
     - interfacer
     - golint
     - ifshort
