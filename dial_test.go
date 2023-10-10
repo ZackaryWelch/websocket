@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ZackaryWelch/websocket/internal/test/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestBadDials(t *testing.T) {
@@ -202,7 +202,7 @@ func Test_verifyServerHandshake(t *testing.T) {
 
 			r := httptest.NewRequest(http.MethodGet, "/", http.NoBody)
 			key, err := secWebSocketKey(rand.Reader)
-			assert.Success(t, err)
+			assert.NoError(t, err)
 			r.Header.Set("Sec-WebSocket-Key", key)
 
 			if resp.Header.Get("Sec-WebSocket-Accept") == "" {
@@ -214,7 +214,7 @@ func Test_verifyServerHandshake(t *testing.T) {
 			}
 			_, err = verifyServerResponse(opts, opts.CompressionMode.opts(), key, resp)
 			if tc.success {
-				assert.Success(t, err)
+				assert.NoError(t, err)
 			} else {
 				assert.Error(t, err)
 			}

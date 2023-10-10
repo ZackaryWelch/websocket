@@ -169,12 +169,11 @@ func writeFrameHeader(h header, w *bufio.Writer, buf []byte) (err error) {
 	return nil
 }
 
-// mask applies the WebSocket masking algorithm to p
-// with the given key.
+// mask applies the WebSocket masking algorithm to p with the given key.
 // See https://tools.ietf.org/html/rfc6455#section-5.3
 //
 // The returned value is the correctly rotated key to
-// to continue to mask/unmask the message.
+// continue to mask/unmask the message.
 //
 // It is optimized for LittleEndian and expects the key
 // to be in little endian.

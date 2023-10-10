@@ -17,8 +17,8 @@ import (
 	"time"
 
 	"github.com/ZackaryWelch/websocket"
-	"github.com/ZackaryWelch/websocket/internal/test/assert"
 	"github.com/ZackaryWelch/websocket/internal/test/wstest"
+	"github.com/stretchr/testify/assert"
 )
 
 var excludedAutobahnCases = []string{
@@ -45,14 +45,14 @@ func TestAutobahn(t *testing.T) {
 	defer cancel()
 
 	wstestURL, closeFn, err := wstestClientServer(ctx)
-	assert.Success(t, err)
+	assert.NoError(t, err)
 	defer closeFn()
 
 	err = waitWS(ctx, wstestURL)
-	assert.Success(t, err)
+	assert.NoError(t, err)
 
 	cases, err := wstestCaseCount(ctx, wstestURL)
-	assert.Success(t, err)
+	assert.NoError(t, err)
 
 	t.Run("cases", func(t *testing.T) {
 		for i := 1; i <= cases; i++ {
@@ -62,7 +62,7 @@ func TestAutobahn(t *testing.T) {
 				defer cancel()
 
 				c, _, err := websocket.Dial(ctx2, fmt.Sprintf(wstestURL+"/runCase?case=%v&agent=main", i), nil)
-				assert.Success(t, err)
+				assert.NoError(t, err)
 				err = wstest.EchoLoop(ctx2, c)
 				t.Logf("echoLoop: %v", err)
 			})
@@ -70,7 +70,7 @@ func TestAutobahn(t *testing.T) {
 	})
 
 	c, _, err := websocket.Dial(ctx, fmt.Sprintf(wstestURL+"/updateReports?agent=main"), nil)
-	assert.Success(t, err)
+	assert.NoError(t, err)
 	c.Close(websocket.StatusNormalClosure, "")
 
 	checkWSTestIndex(t, "./ci/out/wstestClientReports/index.json")
@@ -162,14 +162,14 @@ func wstestCaseCount(ctx context.Context, url string) (cases int, err error) {
 
 func checkWSTestIndex(t *testing.T, path string) {
 	wstestOut, err := os.ReadFile(path)
-	assert.Success(t, err)
+	assert.NoError(t, err)
 
 	var indexJSON map[string]map[string]struct {
 		Behavior      string `json:"behavior"`
 		BehaviorClose string `json:"behaviorClose"`
 	}
 	err = json.Unmarshal(wstestOut, &indexJSON)
-	assert.Success(t, err)
+	assert.NoError(t, err)
 
 	for _, tests := range indexJSON {
 		for test, result := range tests {

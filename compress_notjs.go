@@ -79,8 +79,7 @@ func (tw *trimLastFourBytesWriter) Write(p []byte) (int, error) {
 		tw.tail = tw.tail[:n]
 	}
 
-	// If p is less than or equal to 4 bytes,
-	// all of it is is part of the tail.
+	// If p is less than or equal to 4 bytes, all of it is part of the tail.
 	if len(p) <= 4 {
 		tw.tail = append(tw.tail, p...)
 		return len(p), nil

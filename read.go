@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ZackaryWelch/websocket/internal/xsync"
+	"gopkg.in/typ.v4/sync2"
 )
 
 // Reader reads from the connection until there is a WebSocket
@@ -431,7 +431,7 @@ func (mr *msgReader) read(p []byte) (int, error) {
 type limitReader struct {
 	c     *Conn
 	r     io.Reader
-	limit xsync.Int64
+	limit sync2.AtomicValue[int64]
 	n     int64
 }
 

@@ -15,7 +15,7 @@ import (
 
 	"github.com/ZackaryWelch/websocket/internal/bpool"
 	"github.com/ZackaryWelch/websocket/internal/wsjs"
-	"github.com/ZackaryWelch/websocket/internal/xsync"
+	"gopkg.in/typ.v4/sync2"
 )
 
 // Conn provides a wrapper around the browser WebSocket API.
@@ -23,10 +23,10 @@ type Conn struct {
 	ws wsjs.WebSocket
 
 	// read limit for a message in bytes.
-	msgReadLimit xsync.Int64
+	msgReadLimit sync2.AtomicValue[int64]
 
 	closingMu     sync.Mutex
-	isReadClosed  xsync.Int64
+	isReadClosed  sync2.AtomicValue[int64]
 	closeOnce     sync.Once
 	closed        chan struct{}
 	closeErrOnce  sync.Once

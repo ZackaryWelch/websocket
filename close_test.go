@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ZackaryWelch/websocket/internal/test/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCloseError(t *testing.T) {
@@ -53,7 +53,7 @@ func TestCloseError(t *testing.T) {
 
 			_, err := tc.ce.bytesErr()
 			if tc.success {
-				assert.Success(t, err)
+				assert.NoError(t, err)
 			} else {
 				assert.Error(t, err)
 			}
@@ -114,7 +114,7 @@ func Test_parseClosePayload(t *testing.T) {
 
 			ce, err := parseClosePayload(tc.p)
 			if tc.success {
-				assert.Success(t, err)
+				assert.NoError(t, err)
 				assert.Equal(t, "close payload", tc.ce, ce)
 			} else {
 				assert.Error(t, err)

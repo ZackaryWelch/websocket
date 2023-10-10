@@ -14,7 +14,7 @@ import (
 	"time"
 	_ "unsafe"
 
-	"github.com/ZackaryWelch/websocket/internal/test/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHeader(t *testing.T) {
@@ -80,13 +80,13 @@ func testHeader(t *testing.T, h header) {
 	r := bufio.NewReader(b)
 
 	err := writeFrameHeader(h, w, make([]byte, 8))
-	assert.Success(t, err)
+	assert.NoError(t, err)
 
 	err = w.Flush()
-	assert.Success(t, err)
+	assert.NoError(t, err)
 
 	h2, err := readFrameHeader(r, make([]byte, 8))
-	assert.Success(t, err)
+	assert.NoError(t, err)
 
 	assert.Equal(t, "read header", h, h2)
 }

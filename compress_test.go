@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ZackaryWelch/websocket/internal/test/assert"
 	"github.com/ZackaryWelch/websocket/internal/test/xrand"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_slidingWindow(t *testing.T) {

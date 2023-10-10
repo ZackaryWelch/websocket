@@ -5,12 +5,14 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"reflect"
 	"time"
 
 	"github.com/ZackaryWelch/websocket"
-	"github.com/ZackaryWelch/websocket/internal/test/assert"
 	"github.com/ZackaryWelch/websocket/internal/test/xrand"
-	"github.com/ZackaryWelch/websocket/internal/xsync"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"google.golang.org/protobuf/proto"
 )
 
 // EchoLoop echos every msg received from c until an error
@@ -57,7 +59,7 @@ func Echo(ctx context.Context, c *websocket.Conn, max int) error {
 
 	msg := randMessage(expType, xrand.Int(max))
 
-	writeErr := xsync.Go(func() error {
+	writeErr := Go(func() error {
 		return c.Write(ctx, expType, msg)
 	})
 
@@ -76,7 +78,7 @@ func Echo(ctx context.Context, c *websocket.Conn, max int) error {
 	}
 
 	if !bytes.Equal(msg, act) {
-		return fmt.Errorf("unexpected msg read: %v", assert.Diff(msg, act))
+		return fmt.Errorf("unexpected msg read: %v", cmp.Diff(msg, act, cmpopts.EquateErrors(), cmp.Exporter(func(r reflect.Type) bool { return true }), cmp.Comparer(proto.Equal)))
 	}
 
 	return nil
@@ -87,4 +89,22 @@ func randMessage(typ websocket.MessageType, n int) []byte {
 		return xrand.Bytes(n)
 	}
 	return []byte(xrand.String(n))
+}
+
+func Go(fn func() error) <-chan error {
+	errs := make(chan error, 1)
+	go func() {
+		defer func() {
+			r := recover()
+			if r != nil {
+				select {
+				case errs <- fmt.Errorf("panic in go fn: %v", r):
+				default:
+				}
+			}
+		}()
+		errs <- fn()
+	}()
+
+	return errs
 }

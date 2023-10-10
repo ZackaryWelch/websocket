@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/ZackaryWelch/websocket"
-	"github.com/ZackaryWelch/websocket/internal/test/assert"
 	"github.com/ZackaryWelch/websocket/internal/test/wstest"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWasm(t *testing.T) {
@@ -21,7 +21,7 @@ func TestWasm(t *testing.T) {
 	c, resp, err := websocket.Dial(ctx, os.Getenv("WS_ECHO_SERVER_URL"), &websocket.DialOptions{
 		Subprotocols: []string{"echo"},
 	})
-	assert.Success(t, err)
+	assert.NoError(t, err)
 	defer c.Close(websocket.StatusInternalError, "")
 
 	assert.Equal(t, "subprotocol", "echo", c.Subprotocol())
@@ -30,9 +30,9 @@ func TestWasm(t *testing.T) {
 	c.SetReadLimit(65536)
 	for i := 0; i < 10; i++ {
 		err = wstest.Echo(ctx, c, 65536)
-		assert.Success(t, err)
+		assert.NoError(t, err)
 	}
 
 	err = c.Close(websocket.StatusNormalClosure, "")
-	assert.Success(t, err)
+	assert.NoError(t, err)
 }

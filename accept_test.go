@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ZackaryWelch/websocket/internal/test/assert"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAccept(t *testing.T) {
@@ -184,7 +184,7 @@ func Test_verifyClientHandshake(t *testing.T) {
 
 			_, err := verifyClientRequest(httptest.NewRecorder(), r)
 			if tc.success {
-				assert.Success(t, err)
+				assert.NoError(t, err)
 			} else {
 				assert.Error(t, err)
 			}
@@ -318,7 +318,7 @@ func Test_authenticateOrigin(t *testing.T) {
 
 			err := authenticateOrigin(r, tc.originPatterns)
 			if tc.success {
-				assert.Success(t, err)
+				assert.NoError(t, err)
 			} else {
 				assert.Error(t, err)
 			}
@@ -396,7 +396,7 @@ func Test_acceptCompression(t *testing.T) {
 				return
 			}
 
-			assert.Success(t, err)
+			assert.NoError(t, err)
 			assert.Equal(t, "compression options", tc.expCopts, copts)
 			assert.Equal(t, "Sec-WebSocket-Extensions", tc.respSecWebSocketExtensions, w.Header().Get("Sec-WebSocket-Extensions"))
 		})

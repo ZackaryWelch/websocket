@@ -17,14 +17,13 @@ import (
 	"time"
 
 	"github.com/ZackaryWelch/websocket"
-	"github.com/ZackaryWelch/websocket/internal/test/assert"
 	"github.com/ZackaryWelch/websocket/internal/test/wstest"
 	"github.com/ZackaryWelch/websocket/internal/test/xrand"
-	"github.com/ZackaryWelch/websocket/internal/xsync"
 	"github.com/ZackaryWelch/websocket/wsjson"
 	"github.com/ZackaryWelch/websocket/wspb"
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/duration"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConn(t *testing.T) {
@@ -54,11 +53,11 @@ func TestConn(t *testing.T) {
 
 				for i := 0; i < 5; i++ {
 					err := wstest.Echo(tt.ctx, c1, 131072)
-					assert.Success(t, err)
+					assert.NoError(t, err)
 				}
 
 				err := c1.Close(websocket.StatusNormalClosure, "")
-				assert.Success(t, err)
+				assert.NoError(t, err)
 			})
 		}
 	})
@@ -80,11 +79,11 @@ func TestConn(t *testing.T) {
 
 		for i := 0; i < 10; i++ {
 			err := c1.Ping(tt.ctx)
-			assert.Success(t, err)
+			assert.NoError(t, err)
 		}
 
 		err := c1.Close(websocket.StatusNormalClosure, "")
-		assert.Success(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("badPing", func(t *testing.T) {
@@ -123,14 +122,14 @@ func TestConn(t *testing.T) {
 		for i := 0; i < count; i++ {
 			select {
 			case err := <-errs:
-				assert.Success(t, err)
+				assert.NoError(t, err)
 			case <-tt.ctx.Done():
 				t.Fatal(tt.ctx.Err())
 			}
 		}
 
 		err := c1.Close(websocket.StatusNormalClosure, "")
-		assert.Success(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("concurrentWriteError", func(t *testing.T) {
@@ -138,7 +137,7 @@ func TestConn(t *testing.T) {
 		defer tt.cleanup()
 
 		_, err := c1.Writer(tt.ctx, websocket.MessageText)
-		assert.Success(t, err)
+		assert.NoError(t, err)
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*100)
 		defer cancel()
@@ -163,7 +162,7 @@ func TestConn(t *testing.T) {
 		assert.Equal(t, "remote addr string", "websocket/unknown-addr", n1.RemoteAddr().String())
 		assert.Equal(t, "remote addr network", "websocket", n1.RemoteAddr().Network())
 
-		errs := xsync.Go(func() error {
+		errs := Go(func() error {
 			_, err := n2.Write([]byte("hello"))
 			if err != nil {
 				return err
@@ -172,14 +171,14 @@ func TestConn(t *testing.T) {
 		})
 
 		b, err := io.ReadAll(n1)
-		assert.Success(t, err)
+		assert.NoError(t, err)
 
 		_, err = n1.Read(nil)
 		assert.Equal(t, "read error", err, io.EOF)
 
 		select {
 		case err := <-errs:
-			assert.Success(t, err)
+			assert.NoError(t, err)
 		case <-tt.ctx.Done():
 			t.Fatal(tt.ctx.Err())
 		}
@@ -194,7 +193,7 @@ func TestConn(t *testing.T) {
 		n1 := websocket.NetConn(tt.ctx, c1, websocket.MessageBinary)
 		n2 := websocket.NetConn(tt.ctx, c2, websocket.MessageText)
 
-		errs := xsync.Go(func() error {
+		errs := Go(func() error {
 			_, err := n2.Write([]byte("hello"))
 			if err != nil {
 				return err
@@ -207,7 +206,7 @@ func TestConn(t *testing.T) {
 
 		select {
 		case err := <-errs:
-			assert.Success(t, err)
+			assert.NoError(t, err)
 		case <-tt.ctx.Done():
 			t.Fatal(tt.ctx.Err())
 		}
@@ -223,24 +222,24 @@ func TestConn(t *testing.T) {
 
 		exp := xrand.String(xrand.Int(131072))
 
-		werr := xsync.Go(func() error {
+		werr := Go(func() error {
 			return wsjson.Write(tt.ctx, c1, exp)
 		})
 
 		var act interface{}
 		err := wsjson.Read(tt.ctx, c1, &act)
-		assert.Success(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "read msg", exp, act)
 
 		select {
 		case err = <-werr:
-			assert.Success(t, err)
+			assert.NoError(t, err)
 		case <-tt.ctx.Done():
 			t.Fatal(tt.ctx.Err())
 		}
 
 		err = c1.Close(websocket.StatusNormalClosure, "")
-		assert.Success(t, err)
+		assert.NoError(t, err)
 	})
 
 	t.Run("wspb", func(t *testing.T) {
@@ -251,15 +250,15 @@ func TestConn(t *testing.T) {
 
 		exp := ptypes.DurationProto(100)
 		err := wspb.Write(tt.ctx, c1, exp)
-		assert.Success(t, err)
+		assert.NoError(t, err)
 
 		act := &duration.Duration{}
 		err = wspb.Read(tt.ctx, c1, act)
-		assert.Success(t, err)
+		assert.NoError(t, err)
 		assert.Equal(t, "read msg", exp, act)
 
 		err = c1.Close(websocket.StatusNormalClosure, "")
-		assert.Success(t, err)
+		assert.NoError(t, err)
 	})
 }
 
@@ -341,7 +340,7 @@ func (tt *connTest) cleanup() {
 func (tt *connTest) goEchoLoop(c *websocket.Conn) {
 	ctx, cancel := context.WithCancel(tt.ctx)
 
-	echoLoopErr := xsync.Go(func() error {
+	echoLoopErr := Go(func() error {
 		err := wstest.EchoLoop(ctx, c)
 		return assertCloseStatus(websocket.StatusNormalClosure, err)
 	})
@@ -357,7 +356,7 @@ func (tt *connTest) goEchoLoop(c *websocket.Conn) {
 func (tt *connTest) goDiscardLoop(c *websocket.Conn) {
 	ctx, cancel := context.WithCancel(tt.ctx)
 
-	discardLoopErr := xsync.Go(func() error {
+	discardLoopErr := Go(func() error {
 		defer c.Close(websocket.StatusInternalError, "")
 
 		for {
@@ -473,7 +472,7 @@ func BenchmarkConn(b *testing.B) {
 			b.ReportMetric(float64(*bytesRead/b.N), "read/op")
 
 			err := c1.Close(websocket.StatusNormalClosure, "")
-			assert.Success(b, err)
+			assert.NoError(b, err)
 		})
 	}
 }
@@ -489,4 +488,22 @@ func echoServer(w http.ResponseWriter, r *http.Request, opts *websocket.AcceptOp
 
 	err = wstest.EchoLoop(r.Context(), c)
 	return assertCloseStatus(websocket.StatusNormalClosure, err)
+}
+
+func Go(fn func() error) <-chan error {
+	errs := make(chan error, 1)
+	go func() {
+		defer func() {
+			r := recover()
+			if r != nil {
+				select {
+				case errs <- fmt.Errorf("panic in go fn: %v", r):
+				default:
+				}
+			}
+		}()
+		errs <- fn()
+	}()
+
+	return errs
 }
