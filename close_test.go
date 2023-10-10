@@ -66,7 +66,7 @@ func TestCloseError(t *testing.T) {
 			Code:   StatusInternalError,
 			Reason: "meow",
 		}.Error()
-		assert.Equal(t, "CloseError.Error()", exp, act)
+		assert.Equal(t, exp, act, "CloseError.Error()")
 	})
 }
 
@@ -115,7 +115,7 @@ func Test_parseClosePayload(t *testing.T) {
 			ce, err := parseClosePayload(tc.p)
 			if tc.success {
 				assert.NoError(t, err)
-				assert.Equal(t, "close payload", tc.ce, ce)
+				assert.Equal(t, tc.ce, ce, "close payload")
 			} else {
 				assert.Error(t, err)
 			}
@@ -164,7 +164,7 @@ func Test_validWireCloseCode(t *testing.T) {
 			t.Parallel()
 
 			act := validWireCloseCode(tc.code)
-			assert.Equal(t, "wire close code", tc.valid, act)
+			assert.Equal(t, tc.valid, act, "wire close code")
 		})
 	}
 }
@@ -202,7 +202,7 @@ func TestCloseStatus(t *testing.T) {
 			t.Parallel()
 
 			act := CloseStatus(tc.in)
-			assert.Equal(t, "close status", tc.exp, act)
+			assert.Equal(t, tc.exp, act, "close status")
 		})
 	}
 }

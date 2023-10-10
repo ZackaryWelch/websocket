@@ -6,6 +6,7 @@ package websocket_test
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -20,9 +21,6 @@ import (
 	"github.com/ZackaryWelch/websocket/internal/test/wstest"
 	"github.com/ZackaryWelch/websocket/internal/test/xrand"
 	"github.com/ZackaryWelch/websocket/wsjson"
-	"github.com/ZackaryWelch/websocket/wspb"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/duration"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -241,25 +239,6 @@ func TestConn(t *testing.T) {
 		err = c1.Close(websocket.StatusNormalClosure, "")
 		assert.NoError(t, err)
 	})
-
-	t.Run("wspb", func(t *testing.T) {
-		tt, c1, c2 := newConnTest(t, nil, nil)
-		defer tt.cleanup()
-
-		tt.goEchoLoop(c2)
-
-		exp := ptypes.DurationProto(100)
-		err := wspb.Write(tt.ctx, c1, exp)
-		assert.NoError(t, err)
-
-		act := &duration.Duration{}
-		err = wspb.Read(tt.ctx, c1, act)
-		assert.NoError(t, err)
-		assert.Equal(t, "read msg", exp, act)
-
-		err = c1.Close(websocket.StatusNormalClosure, "")
-		assert.NoError(t, err)
-	})
 }
 
 func TestWasm(t *testing.T) {
@@ -290,10 +269,10 @@ func TestWasm(t *testing.T) {
 
 func assertCloseStatus(exp websocket.StatusCode, err error) error {
 	if websocket.CloseStatus(err) == -1 {
-		return fmt.Errorf("expected websocket.CloseError: %T %v", err, err)
+		return fmt.Errorf("expected websocket.CloseError: %T %w", err, err)
 	}
 	if websocket.CloseStatus(err) != exp {
-		return fmt.Errorf("expected close status %v but got %v", exp, err)
+		return fmt.Errorf("expected close status %v but got %w", exp, err)
 	}
 	return nil
 }
@@ -446,7 +425,7 @@ func BenchmarkConn(b *testing.B) {
 				}
 
 				n2, err := r.Read(readBuf)
-				if err != io.EOF {
+				if !errors.Is(err, io.EOF) {
 					assert.Equal(b, "read err", io.EOF, err)
 				}
 				if n2 != 0 {

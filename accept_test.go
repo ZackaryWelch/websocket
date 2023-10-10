@@ -242,7 +242,7 @@ func Test_selectSubprotocol(t *testing.T) {
 			r.Header.Set("Sec-WebSocket-Protocol", strings.Join(tc.clientProtocols, ","))
 
 			negotiated := selectSubprotocol(r, tc.serverProtocols)
-			assert.Equal(t, "negotiated", tc.negotiated, negotiated)
+			assert.Equal(t, tc.negotiated, negotiated, "negotiated")
 		})
 	}
 }
@@ -397,8 +397,8 @@ func Test_acceptCompression(t *testing.T) {
 			}
 
 			assert.NoError(t, err)
-			assert.Equal(t, "compression options", tc.expCopts, copts)
-			assert.Equal(t, "Sec-WebSocket-Extensions", tc.respSecWebSocketExtensions, w.Header().Get("Sec-WebSocket-Extensions"))
+			assert.Equal(t, tc.expCopts, copts, "compression options")
+			assert.Equal(t, tc.respSecWebSocketExtensions, w.Header().Get("Sec-WebSocket-Extensions"), "Sec-WebSocket-Extensions")
 		})
 	}
 }
